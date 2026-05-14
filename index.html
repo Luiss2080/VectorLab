@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISTEMA SVG | Ingeniería de Sistemas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="top-nav">
+        <div class="logo">
+            <svg viewBox="0 0 100 100" fill="none">
+                <path d="M50 5L10 25L50 45L90 25L50 5Z" fill="var(--p)"/>
+                <path d="M10 40L50 60L90 40" stroke="var(--p)" stroke-width="8" stroke-linecap="round"/>
+                <path d="M10 55L50 75L90 55" stroke="var(--p)" stroke-width="8" stroke-linecap="round"/>
+                <path d="M10 70L50 90L90 70" stroke="var(--p)" stroke-width="8" stroke-linecap="round"/>
+            </svg>
+            <div>
+                <span class="univ">UNIVERSIDAD TECNOLÓGICA</span>
+                <span class="title">INGENIERÍA DE SISTEMAS</span>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <button id="btn-playground" class="nav-btn active">LABORATORIO INTERACTIVO</button>
+            <button id="btn-diagram" class="nav-btn">DIAGRAMA DE PROCESOS</button>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <section id="view-playground" class="view active">
+            <div class="card canvas-box">
+                <svg id="svg-lab" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+                    <circle id="target-circle" cx="400" cy="300" r="30" fill="url(#grad)" filter="url(#glow)"/>
+                    <defs>
+                        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:var(--p)"/><stop offset="100%" style="stop-color:var(--p-dark)"/>
+                        </linearGradient>
+                        <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feComposite in="SourceGraphic" in2="b" operator="over"/></filter>
+                    </defs>
+                </svg>
+            </div>
+
+            <aside class="sidebar">
+                <div class="card">
+                    <h2>HERRAMIENTAS VECTORIALES</h2>
+                    <button id="add-rect" class="btn">CREAR RECTÁNGULO</button>
+                    <button id="add-circle" class="btn">CREAR CÍRCULO</button>
+                    <button id="btn-clear" class="btn btn-danger">VACIAR LIENZO</button>
+                </div>
+
+                <div class="card">
+                    <h2>AJUSTES DE SISTEMA</h2>
+                    <div class="setting-item"><label>DIFICULTAD DE INTERACCIÓN</label><input type="range" id="range-diff" min="40" max="250" value="100"></div>
+                    <div class="setting-item" style="display: flex; align-items: center; justify-content: space-between;">
+                        <label style="margin:0">EFECTOS DE SONIDO</label>
+                        <input type="checkbox" id="chk-audio" checked>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <section id="view-diagram" class="view">
+            <div class="card" style="grid-column: 1 / -1; height: 100%; padding: 0;">
+                <h2 style="font-size: 1.2rem; text-align: center; margin: 1.5rem 0;">REPRESENTACIÓN VECTORIAL: FLUJO TIPOGRÁFICO</h2>
+                <div class="canvas-box" style="border: none;">
+                    <svg id="svg-diagram" viewBox="0 0 800 1000" preserveAspectRatio="xMidYMid meet">
+                        <g id="diagram-content"></g>
+                    </svg>
+                    <div class="zoom-hint">Usa la rueda del ratón para hacer zoom y arrastra para mover</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <span class="copyright">© 2026 Universidad Tecnológica - Facultad de Ingeniería de Sistemas</span>
+        <div class="extra-info">
+            LABORATORIO DE GRÁFICOS VECTORIALES | VERSIÓN 2.0 OPTIMIZADA
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>
