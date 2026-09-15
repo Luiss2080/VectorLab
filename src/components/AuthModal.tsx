@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Lock, User, Github } from 'lucide-react';
+import { X, Mail, Lock, User } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -68,7 +68,7 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
               </div>
 
               <button className="w-full bg-white/5 hover:bg-white/10 text-white font-medium py-3 rounded-xl border border-white/10 transition-all flex items-center justify-center gap-3">
-                <Github size={20} /> Github
+                Continuar con Github
               </button>
 
               <div className="text-center mt-2">
