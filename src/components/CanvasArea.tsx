@@ -5,22 +5,35 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, Trash2, ArrowUpToLine, ArrowDownToLine } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
+/**
+ * Componente principal que renderiza el SVG y gestiona todas las interacciones físicas:
+ * - Selección y arrastre de figuras.
+ * - Paneo y Zoom (Lienzo infinito).
+ * - Dibujo a mano alzada (Herramienta Lápiz).
+ * - Menú Contextual (Click Derecho).
+ */
 export const CanvasArea = () => {
-  const { shapes, selectedId, setSelectedId, updateShape, duplicateShape, deleteShape, bringToFront, sendToBack } = useCanvasStore();
+  const { shapes, selectedId, setSelectedId, updateShape, addShape, duplicateShape, deleteShape, bringToFront, sendToBack, currentTool, setTool } = useCanvasStore();
+  
+  // Estado de Arrastre de Figuras
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   
-  // Pan & Zoom state
+  // Estado de Paneo y Zoom
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   
-  // Context Menu state
+  // Estado de Dibujo Libre
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [currentPathId, setCurrentPathId] = useState<string | null>(null);
+  
+  // Estado del Menú Contextual
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; shapeId: string | null } | null>(null);
 
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // Spacebar panning toggle
+  // Activa el modo paneo al mantener la barra espaciadora
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space' && !isPanning) document.body.style.cursor = 'grab';
@@ -36,13 +49,16 @@ export const CanvasArea = () => {
     };
   }, [isPanning]);
 
-  // Prevent default context menu
+  // Previene que aparezca el menú contextual del navegador
   useEffect(() => {
     const handleContext = (e: MouseEvent) => e.preventDefault();
     document.addEventListener('contextmenu', handleContext);
     return () => document.removeEventListener('contextmenu', handleContext);
   }, []);
 
+  /**
+   * Convierte coordenadas de la pantalla a coordenadas del SVG interno tomando en cuenta Pan y Zoom.
+   */
   const getCoords = (e: React.PointerEvent | React.WheelEvent | MouseEvent) => {
     if (!svgRef.current) return { x: 0, y: 0 };
     const rect = svgRef.current.getBoundingClientRect();
@@ -52,12 +68,12 @@ export const CanvasArea = () => {
     };
   };
 
+  /** Maneja el Zoom In/Out con la rueda del ratón */
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
     const newZoom = Math.min(Math.max(0.1, zoom * zoomFactor), 5);
     
-    // Zoom around cursor
     if (!svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
@@ -71,26 +87,57 @@ export const CanvasArea = () => {
     setContextMenu(null);
   };
 
+  /** Maneja el inicio de interacción (Click) sobre el fondo del lienzo */
   const handlePointerDown = (e: React.PointerEvent) => {
     setContextMenu(null);
+    
+    // Si presiona Alt, Shift o click medio -> Iniciar paneo
     if (e.button === 1 || e.altKey || (e.button === 0 && e.shiftKey)) {
-      // Middle click or Alt+Click or Shift+Click for panning
       setIsPanning(true);
       document.body.style.cursor = 'grabbing';
       return;
     }
     
+    // Si la herramienta es el Lápiz, iniciamos un nuevo trazo
+    if (currentTool === 'pen') {
+      const coords = getCoords(e);
+      const newId = Date.now().toString();
+      addShape({
+        type: 'path',
+        x: coords.x,
+        y: coords.y,
+        pathData: `M ${coords.x} ${coords.y}`,
+        fill: 'transparent',
+        stroke: '#3b82f6', // Color por defecto
+        strokeWidth: 4
+      });
+      // Sobrescribimos el ID manual ya que addShape genera uno nuevo asíncronamente
+      // En vez de eso, buscaremos la última figura añadida en pointerMove, 
+      // pero para simplificar, usaremos un truco:
+      setTimeout(() => {
+        const state = useCanvasStore.getState();
+        const lastShape = state.shapes[state.shapes.length - 1];
+        if(lastShape && lastShape.type === 'path') {
+          setCurrentPathId(lastShape.id);
+          setIsDrawing(true);
+          setSelectedId(lastShape.id);
+        }
+      }, 0);
+      return;
+    }
+    
+    // Click en el fondo deselecciona
     if (e.target === svgRef.current || (e.target as Element).tagName === 'rect' && (e.target as Element).getAttribute('fill') === 'url(#grid)') {
       setSelectedId(null);
     }
   };
 
+  /** Maneja el clic sobre una figura existente */
   const handleShapePointerDown = (e: React.PointerEvent, id: string) => {
-    if (isPanning || e.button === 1) return;
+    if (isPanning || e.button === 1 || currentTool === 'pen') return;
     e.stopPropagation();
     
     if (e.button === 2) {
-      // Right click context menu
       setSelectedId(id);
       setContextMenu({ x: e.clientX, y: e.clientY, shapeId: id });
       return;
@@ -106,13 +153,25 @@ export const CanvasArea = () => {
     }
   };
 
+  /** Maneja el movimiento del cursor (Arrastre, Paneo, o Dibujo) */
   const handlePointerMove = (e: React.PointerEvent) => {
     if (isPanning) {
       setPan(prev => ({ x: prev.x + e.movementX, y: prev.y + e.movementY }));
       return;
     }
 
-    if (draggingId) {
+    if (isDrawing && currentPathId) {
+      const coords = getCoords(e);
+      const shape = shapes.find(s => s.id === currentPathId);
+      if (shape && shape.pathData) {
+        updateShape(currentPathId, {
+          pathData: `${shape.pathData} L ${coords.x} ${coords.y}`
+        });
+      }
+      return;
+    }
+
+    if (draggingId && currentTool === 'select') {
       const coords = getCoords(e);
       let newX = coords.x - offset.x;
       let newY = coords.y - offset.y;
@@ -130,13 +189,20 @@ export const CanvasArea = () => {
     }
   };
 
+  /** Maneja el fin de la interacción */
   const handlePointerUp = () => {
     setDraggingId(null);
     setIsPanning(false);
+    
+    if (isDrawing) {
+      setIsDrawing(false);
+      setCurrentPathId(null);
+      setTool('select'); // Volver a modo selección automáticamente
+    }
+    
     document.body.style.cursor = 'default';
   };
 
-  // Sort by zIndex before rendering
   const sortedShapes = [...shapes].sort((a, b) => a.zIndex - b.zIndex);
 
   return (
@@ -147,6 +213,7 @@ export const CanvasArea = () => {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onWheel={handleWheel}
+        style={{ cursor: currentTool === 'pen' ? 'crosshair' : 'default' }}
       >
         <defs>
           <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
@@ -162,95 +229,34 @@ export const CanvasArea = () => {
             const opacity = shape.opacity ?? 1;
 
             if (shape.type === 'rect') {
-              return (
-                <rect
-                  key={shape.id}
-                  x={shape.x}
-                  y={shape.y}
-                  width={shape.width}
-                  height={shape.height}
-                  fill={shape.fill}
-                  opacity={opacity}
-                  onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
-                  className="cursor-pointer transition-colors"
-                  {...strokeProps}
-                />
-              );
+              return <rect key={shape.id} x={shape.x} y={shape.y} width={shape.width} height={shape.height} fill={shape.fill} opacity={opacity} onPointerDown={(e) => handleShapePointerDown(e, shape.id)} className="cursor-pointer" {...strokeProps} />;
             }
             if (shape.type === 'circle') {
-              return (
-                <circle
-                  key={shape.id}
-                  cx={shape.x}
-                  cy={shape.y}
-                  r={shape.radius}
-                  fill={shape.fill}
-                  opacity={opacity}
-                  onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
-                  className="cursor-pointer transition-colors"
-                  {...strokeProps}
-                />
-              );
+              return <circle key={shape.id} cx={shape.x} cy={shape.y} r={shape.radius} fill={shape.fill} opacity={opacity} onPointerDown={(e) => handleShapePointerDown(e, shape.id)} className="cursor-pointer" {...strokeProps} />;
             }
             if (shape.type === 'text') {
-              return (
-                <text
-                  key={shape.id}
-                  x={shape.x}
-                  y={shape.y}
-                  fill={shape.fill}
-                  opacity={opacity}
-                  fontSize={shape.fontSize}
-                  fontFamily="Inter, sans-serif"
-                  onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
-                  className="cursor-pointer select-none"
-                  style={{ dominantBaseline: 'hanging' }}
-                >
-                  {shape.text}
-                </text>
-              );
+              return <text key={shape.id} x={shape.x} y={shape.y} fill={shape.fill} opacity={opacity} fontSize={shape.fontSize} fontFamily="Inter, sans-serif" onPointerDown={(e) => handleShapePointerDown(e, shape.id)} className="cursor-pointer select-none" style={{ dominantBaseline: 'hanging' }}>{shape.text}</text>;
             }
             if (shape.type === 'triangle') {
               const w = shape.width || 100;
               const h = shape.height || 100;
               const points = `${shape.x + w/2},${shape.y} ${shape.x + w},${shape.y + h} ${shape.x},${shape.y + h}`;
-              return (
-                <polygon
-                  key={shape.id}
-                  points={points}
-                  fill={shape.fill}
-                  opacity={opacity}
-                  onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
-                  className="cursor-pointer transition-colors"
-                  {...strokeProps}
-                />
-              );
+              return <polygon key={shape.id} points={points} fill={shape.fill} opacity={opacity} onPointerDown={(e) => handleShapePointerDown(e, shape.id)} className="cursor-pointer" {...strokeProps} />;
             }
             if (shape.type === 'line') {
               const x2 = shape.x2 ?? (shape.x + 100);
               const y2 = shape.y2 ?? (shape.y + 100);
-              return (
-                <line
-                  key={shape.id}
-                  x1={shape.x}
-                  y1={shape.y}
-                  x2={x2}
-                  y2={y2}
-                  opacity={opacity}
-                  stroke={shape.stroke || shape.fill}
-                  strokeWidth={shape.strokeWidth || 4}
-                  onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
-                  className="cursor-pointer"
-                  {...(isSelected ? { strokeDasharray: `${4/zoom}`, stroke: '#3b82f6' } : {})}
-                />
-              );
+              return <line key={shape.id} x1={shape.x} y1={shape.y} x2={x2} y2={y2} opacity={opacity} stroke={shape.stroke || shape.fill} strokeWidth={shape.strokeWidth || 4} onPointerDown={(e) => handleShapePointerDown(e, shape.id)} className="cursor-pointer" {...(isSelected ? { strokeDasharray: `${4/zoom}`, stroke: '#3b82f6' } : {})} />;
+            }
+            if (shape.type === 'path') {
+              return <path key={shape.id} d={shape.pathData} fill="none" opacity={opacity} stroke={shape.stroke || shape.fill} strokeWidth={shape.strokeWidth || 4} strokeLinecap="round" strokeLinejoin="round" onPointerDown={(e) => handleShapePointerDown(e, shape.id)} className="cursor-pointer" {...(isSelected ? { strokeDasharray: `${4/zoom}`, stroke: '#3b82f6' } : {})} />;
             }
             return null;
           })}
         </g>
       </svg>
 
-      {/* Context Menu */}
+      {/* Menú Contextual */}
       <AnimatePresence>
         {contextMenu && (
           <motion.div
@@ -261,36 +267,16 @@ export const CanvasArea = () => {
             className="fixed bg-[#161e2e]/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl p-1.5 flex flex-col gap-1 min-w-[160px] z-50"
             style={{ left: contextMenu.x, top: contextMenu.y }}
           >
-            <button 
-              onClick={() => { if(contextMenu.shapeId) duplicateShape(contextMenu.shapeId); setContextMenu(null); toast.success('Duplicado'); }}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors w-full text-left"
-            >
-              <Copy size={14} /> Duplicar
-            </button>
-            <button 
-              onClick={() => { if(contextMenu.shapeId) bringToFront(contextMenu.shapeId); setContextMenu(null); }}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors w-full text-left"
-            >
-              <ArrowUpToLine size={14} /> Traer al Frente
-            </button>
-            <button 
-              onClick={() => { if(contextMenu.shapeId) sendToBack(contextMenu.shapeId); setContextMenu(null); }}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors w-full text-left"
-            >
-              <ArrowDownToLine size={14} /> Enviar al Fondo
-            </button>
+            <button onClick={() => { if(contextMenu.shapeId) duplicateShape(contextMenu.shapeId); setContextMenu(null); toast.success('Duplicado'); }} className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors w-full text-left"><Copy size={14} /> Duplicar</button>
+            <button onClick={() => { if(contextMenu.shapeId) bringToFront(contextMenu.shapeId); setContextMenu(null); }} className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors w-full text-left"><ArrowUpToLine size={14} /> Traer al Frente</button>
+            <button onClick={() => { if(contextMenu.shapeId) sendToBack(contextMenu.shapeId); setContextMenu(null); }} className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors w-full text-left"><ArrowDownToLine size={14} /> Enviar al Fondo</button>
             <div className="h-px bg-white/10 my-1 mx-2" />
-            <button 
-              onClick={() => { if(contextMenu.shapeId) deleteShape(contextMenu.shapeId); setContextMenu(null); toast.success('Eliminado'); }}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-white hover:bg-red-500/80 rounded-lg transition-colors w-full text-left"
-            >
-              <Trash2 size={14} /> Eliminar
-            </button>
+            <button onClick={() => { if(contextMenu.shapeId) deleteShape(contextMenu.shapeId); setContextMenu(null); toast.success('Eliminado'); }} className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-white hover:bg-red-500/80 rounded-lg transition-colors w-full text-left"><Trash2 size={14} /> Eliminar</button>
           </motion.div>
         )}
       </AnimatePresence>
       
-      {/* Zoom Indicator */}
+      {/* Indicador de Zoom */}
       <div className="absolute bottom-4 left-4 bg-[#161e2e]/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-xs text-slate-400 font-mono shadow-lg pointer-events-none">
         {(zoom * 100).toFixed(0)}%
       </div>
