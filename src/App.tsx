@@ -35,6 +35,45 @@ function App() {
     setShowExport(false);
   };
 
+  const handleExportPNG = () => {
+    const svgElement = document.querySelector('.canvas-container svg');
+    if (!svgElement) return;
+
+    // Convert SVG to string
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svgElement);
+    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      const { width, height } = svgElement.getBoundingClientRect();
+      canvas.width = width * 2; // High DPI
+      canvas.height = height * 2;
+      ctx.scale(2, 2);
+      
+      // Optional: draw background (if you want non-transparent)
+      // ctx.fillStyle = '#02040a';
+      // ctx.fillRect(0, 0, width, height);
+
+      ctx.drawImage(img, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      
+      const pngUrl = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = pngUrl;
+      a.download = `figuras-vectoriales-${Date.now()}.png`;
+      a.click();
+      toast.success('Lienzo exportado como PNG');
+      setShowExport(false);
+    };
+    img.src = url;
+  };
+
   const handleClear = () => {
     if (confirm('¿Estás seguro de que deseas limpiar todo el lienzo?')) {
       clearCanvas();
