@@ -10,8 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "fabric": "^7.4.0",
+    "lucide-react": "^1.46.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
