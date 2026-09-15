@@ -1,4 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+declare global {
+  interface Window {
+    __clipboardId?: string;
+  }
+}
 import { Toolbar } from './components/Toolbar';
 import { CanvasArea } from './components/CanvasArea';
 import { PropertiesPanel } from './components/PropertiesPanel';
@@ -36,6 +41,49 @@ function App() {
       toast.success('Lienzo limpiado');
     }
   };
+
+  // Global Keyboard Shortcuts
+  import { useEffect } from 'react';
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts if user is typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        if (e.shiftKey) {
+          e.preventDefault();
+          if (futureStates.length > 0) { redo(); toast('Rehacer'); }
+        } else {
+          e.preventDefault();
+          if (pastStates.length > 0) { undo(); toast('Deshacer'); }
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+        e.preventDefault();
+        if (futureStates.length > 0) { redo(); toast('Rehacer'); }
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        const { selectedId, deleteShape } = useCanvasStore.getState();
+        if (selectedId) {
+          deleteShape(selectedId);
+          toast.success('Eliminado');
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+        const { selectedId } = useCanvasStore.getState();
+        if (selectedId) {
+          // Store ID in window or a ref. For simplicity, just immediately duplicate on Paste
+          window.__clipboardId = selectedId;
+          toast('Copiado');
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        const { duplicateShape } = useCanvasStore.getState();
+        if (window.__clipboardId) {
+          duplicateShape(window.__clipboardId);
+          toast.success('Pegado');
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo, pastStates.length, futureStates.length]);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#02040a] text-white font-sans relative">

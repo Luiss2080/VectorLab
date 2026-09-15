@@ -20,11 +20,13 @@ export interface Shape {
   text?: string;
   fontSize?: number;
   zIndex: number;
+  opacity?: number; // For opacity control
 }
 
 interface CanvasState {
   shapes: Shape[];
   selectedId: string | null;
+  snapToGrid: boolean;
   addShape: (shape: Omit<Shape, 'id' | 'zIndex'>) => void;
   updateShape: (id: string, properties: Partial<Shape>) => void;
   deleteShape: (id: string) => void;
@@ -33,6 +35,7 @@ interface CanvasState {
   bringToFront: (id: string) => void;
   sendToBack: (id: string) => void;
   duplicateShape: (id: string) => void;
+  setSnapToGrid: (snap: boolean) => void;
 }
 
 export const useCanvasStore = create<CanvasState>()(
@@ -41,10 +44,11 @@ export const useCanvasStore = create<CanvasState>()(
       (set) => ({
         shapes: [],
         selectedId: null,
+        snapToGrid: false,
         addShape: (shape) => set((state) => {
           const maxZ = state.shapes.reduce((max, s) => Math.max(max, s.zIndex), 0);
           return {
-            shapes: [...state.shapes, { ...shape, id: Date.now().toString(), zIndex: maxZ + 1 }]
+            shapes: [...state.shapes, { ...shape, id: Date.now().toString(), zIndex: maxZ + 1, opacity: shape.opacity ?? 1 }]
           };
         }),
         updateShape: (id, properties) => set((state) => ({
@@ -75,13 +79,14 @@ export const useCanvasStore = create<CanvasState>()(
           const newShape = { ...shape, id: Date.now().toString(), x: shape.x + 20, y: shape.y + 20, zIndex: maxZ + 1 };
           return { shapes: [...state.shapes, newShape], selectedId: newShape.id };
         }),
+        setSnapToGrid: (snap) => set({ snapToGrid: snap })
       }),
       {
         name: 'canvas-storage',
       }
     ),
     {
-      partialize: (state) => ({ shapes: state.shapes }),
+      partialize: (state) => ({ shapes: state.shapes, snapToGrid: state.snapToGrid }),
     }
   )
 );
