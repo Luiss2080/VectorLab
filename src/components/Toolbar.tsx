@@ -1,4 +1,3 @@
-import type React from 'react';
 import { useCanvasStore } from '../store/useCanvasStore';
 import { Square, Circle, Type, MousePointer2, Triangle, Minus, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
