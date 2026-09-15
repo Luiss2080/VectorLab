@@ -60,7 +60,24 @@ export const PropertiesPanel = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] uppercase tracking-wider text-slate-500">Transparencia (Opacidad)</label>
+                  <div className="flex items-center gap-3 bg-black/50 p-2 rounded-lg border border-white/10">
+                    <input 
+                      type="range" 
+                      name="opacity" 
+                      min="0.1" 
+                      max="1" 
+                      step="0.05"
+                      value={selectedShape.opacity ?? 1} 
+                      onChange={handleChange}
+                      className="w-full accent-blue-500"
+                    />
+                    <span className="text-xs font-mono text-slate-300 w-8 text-right">{Math.round((selectedShape.opacity ?? 1) * 100)}%</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mt-2">
                   <div className="flex flex-col gap-1">
                     <label className="text-[10px] uppercase tracking-wider text-slate-500">Posición X</label>
                     <input type="number" name="x" value={Math.round(selectedShape.x)} onChange={handleChange} className="bg-black/50 border border-white/10 rounded-md px-2 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" />

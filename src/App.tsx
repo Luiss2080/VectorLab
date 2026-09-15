@@ -43,7 +43,6 @@ function App() {
   };
 
   // Global Keyboard Shortcuts
-  import { useEffect } from 'react';
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger shortcuts if user is typing in an input

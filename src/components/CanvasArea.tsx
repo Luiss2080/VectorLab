@@ -114,9 +114,18 @@ export const CanvasArea = () => {
 
     if (draggingId) {
       const coords = getCoords(e);
+      let newX = coords.x - offset.x;
+      let newY = coords.y - offset.y;
+      
+      const { snapToGrid } = useCanvasStore.getState();
+      if (snapToGrid) {
+        newX = Math.round(newX / 40) * 40;
+        newY = Math.round(newY / 40) * 40;
+      }
+      
       updateShape(draggingId, {
-        x: coords.x - offset.x,
-        y: coords.y - offset.y
+        x: newX,
+        y: newY
       });
     }
   };
@@ -150,6 +159,7 @@ export const CanvasArea = () => {
           {sortedShapes.map((shape) => {
             const isSelected = shape.id === selectedId;
             const strokeProps = isSelected ? { stroke: '#3b82f6', strokeWidth: 2 / zoom, strokeDasharray: `${4/zoom}` } : {};
+            const opacity = shape.opacity ?? 1;
 
             if (shape.type === 'rect') {
               return (
@@ -160,6 +170,7 @@ export const CanvasArea = () => {
                   width={shape.width}
                   height={shape.height}
                   fill={shape.fill}
+                  opacity={opacity}
                   onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
                   className="cursor-pointer transition-colors"
                   {...strokeProps}
@@ -174,6 +185,7 @@ export const CanvasArea = () => {
                   cy={shape.y}
                   r={shape.radius}
                   fill={shape.fill}
+                  opacity={opacity}
                   onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
                   className="cursor-pointer transition-colors"
                   {...strokeProps}
@@ -187,6 +199,7 @@ export const CanvasArea = () => {
                   x={shape.x}
                   y={shape.y}
                   fill={shape.fill}
+                  opacity={opacity}
                   fontSize={shape.fontSize}
                   fontFamily="Inter, sans-serif"
                   onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
@@ -206,6 +219,7 @@ export const CanvasArea = () => {
                   key={shape.id}
                   points={points}
                   fill={shape.fill}
+                  opacity={opacity}
                   onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
                   className="cursor-pointer transition-colors"
                   {...strokeProps}
@@ -222,6 +236,7 @@ export const CanvasArea = () => {
                   y1={shape.y}
                   x2={x2}
                   y2={y2}
+                  opacity={opacity}
                   stroke={shape.stroke || shape.fill}
                   strokeWidth={shape.strokeWidth || 4}
                   onPointerDown={(e) => handleShapePointerDown(e, shape.id)}

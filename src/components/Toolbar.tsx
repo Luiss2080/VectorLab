@@ -52,6 +52,19 @@ export const Toolbar = () => {
             <button onClick={handleAddText} className="p-3 rounded-xl hover:bg-white/20 transition-colors text-slate-400 hover:text-white" title="Texto">
               <Type size={24} />
             </button>
+            
+            <div className="w-8 h-px bg-white/10 mx-auto" />
+            
+            <button 
+              onClick={() => {
+                const { snapToGrid, setSnapToGrid } = useCanvasStore.getState();
+                setSnapToGrid(!snapToGrid);
+              }} 
+              className={`p-3 rounded-xl transition-colors ${useCanvasStore(s => s.snapToGrid) ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:bg-white/10'}`} 
+              title="Ajustar a Cuadrícula (Snap to Grid)"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
