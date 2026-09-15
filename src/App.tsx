@@ -27,9 +27,6 @@ function App() {
   const [showAuth, setShowAuth] = useState(false);
 
   // Initialize WebRTC P2P Collaboration
-  import { useCollaboration } from './store/useCollaboration';
-  import { AuthModal } from './components/AuthModal';
-  import { Users, UserCircle } from 'lucide-react';
   const { peers } = useCollaboration();
 
   const handleExportJSON = () => {
@@ -145,6 +142,15 @@ function App() {
             <span className="text-[9px] text-slate-400 font-bold tracking-widest uppercase">Sistema SVG</span>
             <span className="text-sm font-black leading-none bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Pro Editor</span>
           </div>
+          
+          <div className="w-px h-6 bg-white/10 mx-2" />
+          
+          {/* Indicador Multijugador */}
+          <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-md text-emerald-400" title="Usuarios online en este lienzo">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <Users size={14} />
+            <span className="text-xs font-bold">{peers}</span>
+          </div>
         </div>
         
         <div className="flex items-center gap-2 bg-white/5 p-1 rounded-lg border border-white/5">
@@ -174,8 +180,11 @@ function App() {
           <button onClick={() => setShowExport(true)} className="flex items-center gap-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-lg transition-colors shadow-lg shadow-blue-500/20">
             Exportar
           </button>
-          <button onClick={handleClear} className="text-xs font-bold text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500 border border-red-500/20 px-3 py-1.5 rounded-lg transition-colors ml-1">
+          <button onClick={handleClear} className="text-xs font-bold text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500 border border-red-500/20 px-3 py-1.5 rounded-lg transition-colors mx-1">
             Limpiar
+          </button>
+          <button onClick={() => setShowAuth(true)} className="flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg transition-colors">
+            <UserCircle size={14} /> Entrar
           </button>
         </div>
       </header>
