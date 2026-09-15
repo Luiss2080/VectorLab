@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { useCanvasStore } from '../store/useCanvasStore';
 import { Square, Circle, Type, MousePointer2 } from 'lucide-react';
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { useCanvasStore } from '../store/useCanvasStore';
 
 export const PropertiesPanel: React.FC = () => {

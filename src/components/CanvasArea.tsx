@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
+import type React from 'react';
 import { useCanvasStore } from '../store/useCanvasStore';
 
 export const CanvasArea: React.FC = () => {

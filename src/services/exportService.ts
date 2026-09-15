@@ -1,4 +1,4 @@
-import { Shape } from '../store/useCanvasStore';
+import type { Shape } from '../store/useCanvasStore';
 
 export const exportToJSON = (shapes: Shape[]) => {
   const data = JSON.stringify(shapes, null, 2);
