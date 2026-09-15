@@ -1,24 +1,102 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type React from 'react';
 import { useCanvasStore } from '../store/useCanvasStore';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Copy, Trash2, ArrowUpToLine, ArrowDownToLine } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export const CanvasArea = () => {
-  const { shapes, selectedId, setSelectedId, updateShape } = useCanvasStore();
+  const { shapes, selectedId, setSelectedId, updateShape, duplicateShape, deleteShape, bringToFront, sendToBack } = useCanvasStore();
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  
+  // Pan & Zoom state
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  
+  // Context Menu state
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; shapeId: string | null } | null>(null);
+
   const svgRef = useRef<SVGSVGElement>(null);
 
-  const getCoords = (e: React.PointerEvent) => {
+  // Spacebar panning toggle
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !isPanning) document.body.style.cursor = 'grab';
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') document.body.style.cursor = 'default';
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [isPanning]);
+
+  // Prevent default context menu
+  useEffect(() => {
+    const handleContext = (e: MouseEvent) => e.preventDefault();
+    document.addEventListener('contextmenu', handleContext);
+    return () => document.removeEventListener('contextmenu', handleContext);
+  }, []);
+
+  const getCoords = (e: React.PointerEvent | React.WheelEvent | MouseEvent) => {
     if (!svgRef.current) return { x: 0, y: 0 };
     const rect = svgRef.current.getBoundingClientRect();
     return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
+      x: (e.clientX - rect.left - pan.x) / zoom,
+      y: (e.clientY - rect.top - pan.y) / zoom
     };
   };
 
-  const handlePointerDown = (e: React.PointerEvent, id: string) => {
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.min(Math.max(0.1, zoom * zoomFactor), 5);
+    
+    // Zoom around cursor
+    if (!svgRef.current) return;
+    const rect = svgRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    setPan({
+      x: mouseX - (mouseX - pan.x) * (newZoom / zoom),
+      y: mouseY - (mouseY - pan.y) * (newZoom / zoom)
+    });
+    setZoom(newZoom);
+    setContextMenu(null);
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    setContextMenu(null);
+    if (e.button === 1 || e.altKey || (e.button === 0 && e.shiftKey)) {
+      // Middle click or Alt+Click or Shift+Click for panning
+      setIsPanning(true);
+      document.body.style.cursor = 'grabbing';
+      return;
+    }
+    
+    if (e.target === svgRef.current || (e.target as Element).tagName === 'rect' && (e.target as Element).getAttribute('fill') === 'url(#grid)') {
+      setSelectedId(null);
+    }
+  };
+
+  const handleShapePointerDown = (e: React.PointerEvent, id: string) => {
+    if (isPanning || e.button === 1) return;
     e.stopPropagation();
+    
+    if (e.button === 2) {
+      // Right click context menu
+      setSelectedId(id);
+      setContextMenu({ x: e.clientX, y: e.clientY, shapeId: id });
+      return;
+    }
+
+    setContextMenu(null);
     setSelectedId(id);
     setDraggingId(id);
     const coords = getCoords(e);
@@ -29,6 +107,11 @@ export const CanvasArea = () => {
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
+    if (isPanning) {
+      setPan(prev => ({ x: prev.x + e.movementX, y: prev.y + e.movementY }));
+      return;
+    }
+
     if (draggingId) {
       const coords = getCoords(e);
       updateShape(draggingId, {
@@ -40,112 +123,162 @@ export const CanvasArea = () => {
 
   const handlePointerUp = () => {
     setDraggingId(null);
+    setIsPanning(false);
+    document.body.style.cursor = 'default';
   };
 
   // Sort by zIndex before rendering
   const sortedShapes = [...shapes].sort((a, b) => a.zIndex - b.zIndex);
 
   return (
-    <div className="flex-1 bg-[#05080f] overflow-hidden relative" onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
+    <div className="flex-1 bg-[#02040a] overflow-hidden relative" onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
       <svg
         ref={svgRef}
         className="w-full h-full"
-        onPointerDown={() => setSelectedId(null)}
+        onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
+        onWheel={handleWheel}
       >
         <defs>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1"/>
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" pointerEvents="none" />
+        <rect width="100%" height="100%" fill="url(#grid)" pointerEvents="all" />
         
-        {sortedShapes.map((shape) => {
-          const isSelected = shape.id === selectedId;
-          const strokeProps = isSelected ? { stroke: '#3b82f6', strokeWidth: 2, strokeDasharray: '4' } : {};
+        <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
+          {sortedShapes.map((shape) => {
+            const isSelected = shape.id === selectedId;
+            const strokeProps = isSelected ? { stroke: '#3b82f6', strokeWidth: 2 / zoom, strokeDasharray: `${4/zoom}` } : {};
 
-          if (shape.type === 'rect') {
-            return (
-              <rect
-                key={shape.id}
-                x={shape.x}
-                y={shape.y}
-                width={shape.width}
-                height={shape.height}
-                fill={shape.fill}
-                onPointerDown={(e) => handlePointerDown(e, shape.id)}
-                className="cursor-pointer transition-colors"
-                {...strokeProps}
-              />
-            );
-          }
-          if (shape.type === 'circle') {
-            return (
-              <circle
-                key={shape.id}
-                cx={shape.x}
-                cy={shape.y}
-                r={shape.radius}
-                fill={shape.fill}
-                onPointerDown={(e) => handlePointerDown(e, shape.id)}
-                className="cursor-pointer transition-colors"
-                {...strokeProps}
-              />
-            );
-          }
-          if (shape.type === 'text') {
-            return (
-              <text
-                key={shape.id}
-                x={shape.x}
-                y={shape.y}
-                fill={shape.fill}
-                fontSize={shape.fontSize}
-                fontFamily="Inter, sans-serif"
-                onPointerDown={(e) => handlePointerDown(e, shape.id)}
-                className="cursor-pointer select-none"
-                style={{ dominantBaseline: 'hanging' }}
-              >
-                {shape.text}
-              </text>
-            );
-          }
-          if (shape.type === 'triangle') {
-            const w = shape.width || 100;
-            const h = shape.height || 100;
-            const points = `${shape.x + w/2},${shape.y} ${shape.x + w},${shape.y + h} ${shape.x},${shape.y + h}`;
-            return (
-              <polygon
-                key={shape.id}
-                points={points}
-                fill={shape.fill}
-                onPointerDown={(e) => handlePointerDown(e, shape.id)}
-                className="cursor-pointer transition-colors"
-                {...strokeProps}
-              />
-            );
-          }
-          if (shape.type === 'line') {
-            const x2 = shape.x2 ?? (shape.x + 100);
-            const y2 = shape.y2 ?? (shape.y + 100);
-            return (
-              <line
-                key={shape.id}
-                x1={shape.x}
-                y1={shape.y}
-                x2={x2}
-                y2={y2}
-                stroke={shape.stroke || shape.fill}
-                strokeWidth={shape.strokeWidth || 4}
-                onPointerDown={(e) => handlePointerDown(e, shape.id)}
-                className="cursor-pointer"
-                {...(isSelected ? { strokeDasharray: '4', stroke: '#3b82f6' } : {})}
-              />
-            );
-          }
-          return null;
-        })}
+            if (shape.type === 'rect') {
+              return (
+                <rect
+                  key={shape.id}
+                  x={shape.x}
+                  y={shape.y}
+                  width={shape.width}
+                  height={shape.height}
+                  fill={shape.fill}
+                  onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
+                  className="cursor-pointer transition-colors"
+                  {...strokeProps}
+                />
+              );
+            }
+            if (shape.type === 'circle') {
+              return (
+                <circle
+                  key={shape.id}
+                  cx={shape.x}
+                  cy={shape.y}
+                  r={shape.radius}
+                  fill={shape.fill}
+                  onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
+                  className="cursor-pointer transition-colors"
+                  {...strokeProps}
+                />
+              );
+            }
+            if (shape.type === 'text') {
+              return (
+                <text
+                  key={shape.id}
+                  x={shape.x}
+                  y={shape.y}
+                  fill={shape.fill}
+                  fontSize={shape.fontSize}
+                  fontFamily="Inter, sans-serif"
+                  onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
+                  className="cursor-pointer select-none"
+                  style={{ dominantBaseline: 'hanging' }}
+                >
+                  {shape.text}
+                </text>
+              );
+            }
+            if (shape.type === 'triangle') {
+              const w = shape.width || 100;
+              const h = shape.height || 100;
+              const points = `${shape.x + w/2},${shape.y} ${shape.x + w},${shape.y + h} ${shape.x},${shape.y + h}`;
+              return (
+                <polygon
+                  key={shape.id}
+                  points={points}
+                  fill={shape.fill}
+                  onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
+                  className="cursor-pointer transition-colors"
+                  {...strokeProps}
+                />
+              );
+            }
+            if (shape.type === 'line') {
+              const x2 = shape.x2 ?? (shape.x + 100);
+              const y2 = shape.y2 ?? (shape.y + 100);
+              return (
+                <line
+                  key={shape.id}
+                  x1={shape.x}
+                  y1={shape.y}
+                  x2={x2}
+                  y2={y2}
+                  stroke={shape.stroke || shape.fill}
+                  strokeWidth={shape.strokeWidth || 4}
+                  onPointerDown={(e) => handleShapePointerDown(e, shape.id)}
+                  className="cursor-pointer"
+                  {...(isSelected ? { strokeDasharray: `${4/zoom}`, stroke: '#3b82f6' } : {})}
+                />
+              );
+            }
+            return null;
+          })}
+        </g>
       </svg>
+
+      {/* Context Menu */}
+      <AnimatePresence>
+        {contextMenu && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.1 }}
+            className="fixed bg-[#161e2e]/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl p-1.5 flex flex-col gap-1 min-w-[160px] z-50"
+            style={{ left: contextMenu.x, top: contextMenu.y }}
+          >
+            <button 
+              onClick={() => { if(contextMenu.shapeId) duplicateShape(contextMenu.shapeId); setContextMenu(null); toast.success('Duplicado'); }}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors w-full text-left"
+            >
+              <Copy size={14} /> Duplicar
+            </button>
+            <button 
+              onClick={() => { if(contextMenu.shapeId) bringToFront(contextMenu.shapeId); setContextMenu(null); }}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors w-full text-left"
+            >
+              <ArrowUpToLine size={14} /> Traer al Frente
+            </button>
+            <button 
+              onClick={() => { if(contextMenu.shapeId) sendToBack(contextMenu.shapeId); setContextMenu(null); }}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors w-full text-left"
+            >
+              <ArrowDownToLine size={14} /> Enviar al Fondo
+            </button>
+            <div className="h-px bg-white/10 my-1 mx-2" />
+            <button 
+              onClick={() => { if(contextMenu.shapeId) deleteShape(contextMenu.shapeId); setContextMenu(null); toast.success('Eliminado'); }}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-white hover:bg-red-500/80 rounded-lg transition-colors w-full text-left"
+            >
+              <Trash2 size={14} /> Eliminar
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Zoom Indicator */}
+      <div className="absolute bottom-4 left-4 bg-[#161e2e]/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-xs text-slate-400 font-mono shadow-lg pointer-events-none">
+        {(zoom * 100).toFixed(0)}%
+      </div>
     </div>
   );
 };
