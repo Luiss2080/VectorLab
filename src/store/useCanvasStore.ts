@@ -32,6 +32,7 @@ interface CanvasState {
   clearCanvas: () => void;
   bringToFront: (id: string) => void;
   sendToBack: (id: string) => void;
+  duplicateShape: (id: string) => void;
 }
 
 export const useCanvasStore = create<CanvasState>()(
@@ -66,6 +67,13 @@ export const useCanvasStore = create<CanvasState>()(
           return {
             shapes: state.shapes.map(s => s.id === id ? { ...s, zIndex: minZ - 1 } : s)
           };
+        }),
+        duplicateShape: (id) => set((state) => {
+          const shape = state.shapes.find(s => s.id === id);
+          if (!shape) return state;
+          const maxZ = state.shapes.reduce((max, s) => Math.max(max, s.zIndex), 0);
+          const newShape = { ...shape, id: Date.now().toString(), x: shape.x + 20, y: shape.y + 20, zIndex: maxZ + 1 };
+          return { shapes: [...state.shapes, newShape], selectedId: newShape.id };
         }),
       }),
       {
