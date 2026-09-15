@@ -295,6 +295,8 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </div>
   );
 }
