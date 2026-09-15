@@ -2,11 +2,15 @@ import { Toolbar } from './components/Toolbar';
 import { CanvasArea } from './components/CanvasArea';
 import { PropertiesPanel } from './components/PropertiesPanel';
 import { exportToJSON, exportToSVG } from './services/exportService';
+import { useStore } from 'zustand';
 import { useCanvasStore } from './store/useCanvasStore';
-import { Download, Save } from 'lucide-react';
+import { Download, Save, Undo, Redo } from 'lucide-react';
 
 function App() {
   const { shapes, clearCanvas } = useCanvasStore();
+  const { undo, redo } = useCanvasStore.temporal.getState();
+  const pastStates = useStore(useCanvasStore.temporal, (state) => state.pastStates);
+  const futureStates = useStore(useCanvasStore.temporal, (state) => state.futureStates);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-black text-white font-sans">
@@ -20,6 +24,26 @@ function App() {
             <span className="text-sm font-black leading-none">Gráficos Vectoriales</span>
           </div>
         </div>
+        
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => undo()} 
+            disabled={pastStates.length === 0}
+            className="flex items-center justify-center p-2 rounded text-slate-300 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            title="Deshacer"
+          >
+            <Undo size={18} />
+          </button>
+          <button 
+            onClick={() => redo()} 
+            disabled={futureStates.length === 0}
+            className="flex items-center justify-center p-2 rounded text-slate-300 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            title="Rehacer"
+          >
+            <Redo size={18} />
+          </button>
+        </div>
+
         <div className="flex items-center gap-3">
           <button onClick={() => exportToJSON(shapes)} className="flex items-center gap-2 text-sm text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded transition-colors border border-white/10">
             <Save size={16} /> JSON

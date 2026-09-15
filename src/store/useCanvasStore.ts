@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { temporal } from 'zundo';
 
 export type ShapeType = 'rect' | 'circle' | 'text';
 
@@ -25,19 +27,31 @@ interface CanvasState {
   clearCanvas: () => void;
 }
 
-export const useCanvasStore = create<CanvasState>((set) => ({
-  shapes: [],
-  selectedId: null,
-  addShape: (shape) => set((state) => ({
-    shapes: [...state.shapes, { ...shape, id: Date.now().toString() }]
-  })),
-  updateShape: (id, properties) => set((state) => ({
-    shapes: state.shapes.map(s => s.id === id ? { ...s, ...properties } : s)
-  })),
-  deleteShape: (id) => set((state) => ({
-    shapes: state.shapes.filter(s => s.id !== id),
-    selectedId: state.selectedId === id ? null : state.selectedId
-  })),
-  setSelectedId: (id) => set({ selectedId: id }),
-  clearCanvas: () => set({ shapes: [], selectedId: null })
-}));
+export const useCanvasStore = create<CanvasState>()(
+  temporal(
+    persist(
+      (set) => ({
+        shapes: [],
+        selectedId: null,
+        addShape: (shape) => set((state) => ({
+          shapes: [...state.shapes, { ...shape, id: Date.now().toString() }]
+        })),
+        updateShape: (id, properties) => set((state) => ({
+          shapes: state.shapes.map(s => s.id === id ? { ...s, ...properties } : s)
+        })),
+        deleteShape: (id) => set((state) => ({
+          shapes: state.shapes.filter(s => s.id !== id),
+          selectedId: state.selectedId === id ? null : state.selectedId
+        })),
+        setSelectedId: (id) => set({ selectedId: id }),
+        clearCanvas: () => set({ shapes: [], selectedId: null })
+      }),
+      {
+        name: 'canvas-storage',
+      }
+    ),
+    {
+      partialize: (state) => ({ shapes: state.shapes }),
+    }
+  )
+);
