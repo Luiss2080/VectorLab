@@ -56,7 +56,6 @@ describe('useCanvasStore', () => {
     
     const shapes = useCanvasStore.getState().shapes;
     const id1 = shapes[0].id;
-    const id2 = shapes[1].id;
 
     expect(shapes[0].zIndex).toBe(1);
     expect(shapes[1].zIndex).toBe(2);
