@@ -204,6 +204,16 @@ function App() {
                     </div>
                   </div>
                 </button>
+
+                <button onClick={handleExportPNG} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-purple-500/50 transition-all group">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-500/20 text-purple-400 rounded-lg group-hover:bg-purple-500 group-hover:text-white transition-colors"><Download size={24} /></div>
+                    <div className="flex flex-col items-start">
+                      <span className="font-bold">Imagen Rasterizada (PNG)</span>
+                      <span className="text-xs text-slate-400">Exporta tu lienzo a imagen de alta calidad</span>
+                    </div>
+                  </div>
+                </button>
                 
                 <button onClick={handleExportJSON} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/50 transition-all group">
                   <div className="flex items-center gap-3">
