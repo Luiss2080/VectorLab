@@ -4,6 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { PanelRightClose, PanelRightOpen, ArrowUpToLine, ArrowDownToLine, Trash2 } from 'lucide-react';
 
+/**
+ * Componente PropertiesPanel (Panel de Propiedades)
+ * Permite al usuario editar las características de la figura seleccionada.
+ */
 export const PropertiesPanel = () => {
   const { shapes, selectedId, updateShape, deleteShape, bringToFront, sendToBack } = useCanvasStore();
   const [isOpen, setIsOpen] = useState(true);
@@ -17,6 +21,12 @@ export const PropertiesPanel = () => {
       [name]: type === 'number' ? Number(value) : value
     });
   };
+
+  const handleColorSwatch = (color: string) => {
+    if (selectedShape) updateShape(selectedShape.id, { fill: color });
+  };
+
+  const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#ffffff', '#000000'];
 
   return (
     <div className="relative h-full flex items-center z-10 pointer-events-none">
@@ -46,13 +56,27 @@ export const PropertiesPanel = () => {
               </div>
             ) : (
               <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs text-slate-400 font-medium">Color de Relleno</label>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[10px] uppercase tracking-wider text-slate-500">Color (Fill)</label>
+                  
+                  {/* Swatches de Colores Rápidos */}
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {COLORS.map(color => (
+                      <button
+                        key={color}
+                        onClick={() => handleColorSwatch(color)}
+                        className="w-6 h-6 rounded-full shadow-sm hover:scale-110 transition-transform border border-white/20"
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+
                   <div className="flex items-center gap-2 bg-black/30 p-1.5 rounded-lg border border-white/5">
                     <input 
                       type="color" 
                       name="fill" 
-                      value={selectedShape.fill} 
+                      value={selectedShape.fill.startsWith('#') ? selectedShape.fill : '#ffffff'} 
                       onChange={handleChange}
                       className="w-8 h-8 rounded cursor-pointer bg-transparent border-none p-0"
                     />
