@@ -4,9 +4,9 @@ import { temporal } from 'zundo';
 
 /**
  * Tipos de figuras soportadas por el sistema.
- * @typedef {'rect' | 'circle' | 'text' | 'triangle' | 'line' | 'path'} ShapeType
+ * @typedef {'rect' | 'circle' | 'text' | 'triangle' | 'line' | 'path' | 'image'} ShapeType
  */
-export type ShapeType = 'rect' | 'circle' | 'text' | 'triangle' | 'line' | 'path';
+export type ShapeType = 'rect' | 'circle' | 'text' | 'triangle' | 'line' | 'path' | 'image';
 
 /**
  * Interfaz que define las propiedades fundamentales de cualquier figura en el lienzo.
@@ -33,6 +33,8 @@ export interface Shape {
   y2?: number; 
   /** Datos del trazado SVG (Aplica para paths/dibujo a mano alzada) */
   pathData?: string;
+  /** Datos de la imagen en base64 (Aplica para type image) */
+  imageUrl?: string;
   /** Color de relleno en formato hexadecimal, rgb, o palabra clave */
   fill: string;
   /** Color del contorno (stroke) */
