@@ -12,9 +12,11 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "fabric": "^7.4.0",
+    "framer-motion": "^13.3.0",
     "lucide-react": "^1.46.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-hot-toast": "^2.6.0",
     "zundo": "^2.3.0",
     "zustand": "^5.0.15"
   },
