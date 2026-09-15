@@ -1,5 +1,5 @@
 import { useCanvasStore } from '../store/useCanvasStore';
-import { Square, Circle, Type, MousePointer2, Triangle, Minus, PanelLeftClose, PanelLeftOpen, Pen } from 'lucide-react';
+import { Square, Circle, Type, MousePointer2, Triangle, Minus, PanelLeftClose, PanelLeftOpen, Pen, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 

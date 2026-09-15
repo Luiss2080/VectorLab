@@ -251,6 +251,14 @@ export const CanvasArea = () => {
             if (shape.type === 'path') {
               return <path key={shape.id} d={shape.pathData} fill="none" opacity={opacity} stroke={shape.stroke || shape.fill} strokeWidth={shape.strokeWidth || 4} strokeLinecap="round" strokeLinejoin="round" onPointerDown={(e) => handleShapePointerDown(e, shape.id)} className="cursor-pointer" {...(isSelected ? { strokeDasharray: `${4/zoom}`, stroke: '#3b82f6' } : {})} />;
             }
+            if (shape.type === 'image') {
+              return (
+                <g key={shape.id} onPointerDown={(e) => handleShapePointerDown(e, shape.id)} className="cursor-pointer">
+                  <image href={shape.imageUrl} x={shape.x} y={shape.y} width={shape.width} height={shape.height} opacity={opacity} preserveAspectRatio="none" />
+                  {isSelected && <rect x={shape.x} y={shape.y} width={shape.width} height={shape.height} fill="none" stroke="#3b82f6" strokeWidth={2/zoom} strokeDasharray={`${4/zoom}`} />}
+                </g>
+              );
+            }
             return null;
           })}
         </g>
