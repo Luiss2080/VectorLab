@@ -10,9 +10,11 @@ import { PropertiesPanel } from './components/PropertiesPanel';
 import { exportToJSON, exportToSVG } from './services/exportService';
 import { useStore } from 'zustand';
 import { useCanvasStore } from './store/useCanvasStore';
-import { Download, Save, Undo, Redo, HelpCircle, X } from 'lucide-react';
+import { Download, Save, Undo, Redo, HelpCircle, X, Users, UserCircle } from 'lucide-react';
 import { Toaster, toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCollaboration } from './store/useCollaboration';
+import { AuthModal } from './components/AuthModal';
 
 function App() {
   const { shapes, clearCanvas } = useCanvasStore();
@@ -22,6 +24,13 @@ function App() {
 
   const [showHelp, setShowHelp] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+
+  // Initialize WebRTC P2P Collaboration
+  import { useCollaboration } from './store/useCollaboration';
+  import { AuthModal } from './components/AuthModal';
+  import { Users, UserCircle } from 'lucide-react';
+  const { peers } = useCollaboration();
 
   const handleExportJSON = () => {
     exportToJSON(shapes);
