@@ -38,17 +38,17 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#05080f] text-white font-sans relative">
+    <div className="flex flex-col h-screen overflow-hidden bg-[#02040a] text-white font-sans relative">
       <Toaster position="bottom-right" toastOptions={{ style: { background: '#161e2e', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' } }} />
       
-      <header className="h-14 border-b border-white/10 bg-[#080b14]/80 backdrop-blur-md flex items-center justify-between px-6 shrink-0 shadow-lg z-20">
+      <header className="absolute top-4 left-1/2 -translate-x-1/2 h-14 border border-white/10 bg-[#080b14]/70 backdrop-blur-xl flex items-center justify-between px-4 rounded-2xl shadow-2xl shadow-black/50 z-20 min-w-[600px]">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-black shadow-lg shadow-blue-500/20">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-black shadow-lg shadow-blue-500/20 text-white">
             S
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">Sistema SVG</span>
-            <span className="text-sm font-black leading-none bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Gráficos Vectoriales</span>
+            <span className="text-[9px] text-slate-400 font-bold tracking-widest uppercase">Sistema SVG</span>
+            <span className="text-sm font-black leading-none bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Pro Editor</span>
           </div>
         </div>
         
@@ -56,7 +56,7 @@ function App() {
           <button 
             onClick={() => { undo(); toast('Deshacer'); }} 
             disabled={pastStates.length === 0}
-            className="flex items-center justify-center p-1.5 rounded text-slate-300 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            className="flex items-center justify-center p-1.5 rounded-md text-slate-300 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
             title="Deshacer"
           >
             <Undo size={16} />
@@ -65,27 +65,27 @@ function App() {
           <button 
             onClick={() => { redo(); toast('Rehacer'); }} 
             disabled={futureStates.length === 0}
-            className="flex items-center justify-center p-1.5 rounded text-slate-300 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            className="flex items-center justify-center p-1.5 rounded-md text-slate-300 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
             title="Rehacer"
           >
             <Redo size={16} />
           </button>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button onClick={() => setShowHelp(true)} className="flex items-center justify-center p-2 rounded text-slate-400 hover:text-white hover:bg-white/10 transition-colors mr-2">
-            <HelpCircle size={20} />
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowHelp(true)} className="flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
+            <HelpCircle size={18} />
           </button>
-          <button onClick={() => setShowExport(true)} className="flex items-center gap-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 px-4 py-1.5 rounded-md transition-colors shadow-lg shadow-blue-500/20">
+          <button onClick={() => setShowExport(true)} className="flex items-center gap-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-lg transition-colors shadow-lg shadow-blue-500/20">
             Exportar
           </button>
-          <button onClick={handleClear} className="text-sm font-semibold text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500 border border-red-500/20 px-4 py-1.5 rounded-md transition-colors ml-2">
+          <button onClick={handleClear} className="text-xs font-bold text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500 border border-red-500/20 px-3 py-1.5 rounded-lg transition-colors ml-1">
             Limpiar
           </button>
         </div>
       </header>
 
-      <main className="flex-1 flex overflow-hidden">
+      <main className="flex-1 flex overflow-hidden absolute inset-0">
         <Toolbar />
         <CanvasArea />
         <PropertiesPanel />
