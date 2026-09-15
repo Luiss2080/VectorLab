@@ -1,17 +1,21 @@
 import { useCanvasStore } from '../store/useCanvasStore';
-import { Square, Circle, Type, MousePointer2, Triangle, Minus, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Square, Circle, Type, MousePointer2, Triangle, Minus, PanelLeftClose, PanelLeftOpen, Pen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
+/**
+ * Componente Toolbar (Barra de Herramientas Flotante)
+ * Permite al usuario seleccionar herramientas y crear figuras básicas.
+ */
 export const Toolbar = () => {
-  const { addShape, setSelectedId } = useCanvasStore();
+  const { addShape, setSelectedId, setTool, currentTool, snapToGrid, setSnapToGrid } = useCanvasStore();
   const [isOpen, setIsOpen] = useState(true);
 
-  const handleAddRect = () => addShape({ type: 'rect', x: 100, y: 100, width: 100, height: 100, fill: '#3b82f6' });
-  const handleAddCircle = () => addShape({ type: 'circle', x: 200, y: 200, radius: 50, fill: '#f59e0b' });
-  const handleAddText = () => addShape({ type: 'text', x: 300, y: 300, text: 'Nuevo Texto', fill: '#ffffff', fontSize: 24 });
-  const handleAddTriangle = () => addShape({ type: 'triangle', x: 400, y: 400, width: 100, height: 100, fill: '#10b981' });
-  const handleAddLine = () => addShape({ type: 'line', x: 100, y: 500, x2: 250, y2: 650, fill: '#ef4444', strokeWidth: 4 });
+  const handleAddRect = () => { addShape({ type: 'rect', x: 100, y: 100, width: 100, height: 100, fill: '#3b82f6' }); setTool('select'); };
+  const handleAddCircle = () => { addShape({ type: 'circle', x: 200, y: 200, radius: 50, fill: '#f59e0b' }); setTool('select'); };
+  const handleAddText = () => { addShape({ type: 'text', x: 300, y: 300, text: 'Nuevo Texto', fill: '#ffffff', fontSize: 24 }); setTool('select'); };
+  const handleAddTriangle = () => { addShape({ type: 'triangle', x: 400, y: 400, width: 100, height: 100, fill: '#10b981' }); setTool('select'); };
+  const handleAddLine = () => { addShape({ type: 'line', x: 100, y: 500, x2: 250, y2: 650, fill: '#ef4444', strokeWidth: 4 }); setTool('select'); };
 
   return (
     <div className="relative h-full flex items-center z-10 pointer-events-none">
@@ -52,15 +56,19 @@ export const Toolbar = () => {
             <button onClick={handleAddText} className="p-3 rounded-xl hover:bg-white/20 transition-colors text-slate-400 hover:text-white" title="Texto">
               <Type size={24} />
             </button>
+            <button 
+              onClick={() => setTool('pen')} 
+              className={`p-3 rounded-xl transition-colors ${currentTool === 'pen' ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:bg-white/10'}`} 
+              title="Dibujo Libre (Lápiz)"
+            >
+              <Pen size={24} />
+            </button>
             
             <div className="w-8 h-px bg-white/10 mx-auto" />
             
             <button 
-              onClick={() => {
-                const { snapToGrid, setSnapToGrid } = useCanvasStore.getState();
-                setSnapToGrid(!snapToGrid);
-              }} 
-              className={`p-3 rounded-xl transition-colors ${useCanvasStore(s => s.snapToGrid) ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:bg-white/10'}`} 
+              onClick={() => setSnapToGrid(!snapToGrid)} 
+              className={`p-3 rounded-xl transition-colors ${snapToGrid ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:bg-white/10'}`} 
               title="Ajustar a Cuadrícula (Snap to Grid)"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
