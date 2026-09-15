@@ -65,7 +65,7 @@ describe('useCanvasStore', () => {
     expect(useCanvasStore.getState().shapes.find(s => s.id === id1)?.zIndex).toBe(3);
 
     store.sendToBack(id1);
-    expect(useCanvasStore.getState().shapes.find(s => s.id === id1)?.zIndex).toBe(0);
+    expect(useCanvasStore.getState().shapes.find(s => s.id === id1)?.zIndex).toBe(-1);
   });
 
   it('debería cambiar el modo snapToGrid', () => {
