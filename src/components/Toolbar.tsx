@@ -17,6 +17,34 @@ export const Toolbar = () => {
   const handleAddTriangle = () => { addShape({ type: 'triangle', x: 400, y: 400, width: 100, height: 100, fill: '#10b981' }); setTool('select'); };
   const handleAddLine = () => { addShape({ type: 'line', x: 100, y: 500, x2: 250, y2: 650, fill: '#ef4444', strokeWidth: 4 }); setTool('select'); };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Check file size (limit to 2MB to avoid local storage bloat)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('La imagen es muy grande. El límite es 2MB para no saturar la memoria local.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      addShape({
+        type: 'image',
+        x: 200,
+        y: 200,
+        width: 300,
+        height: 300,
+        imageUrl: base64,
+        fill: 'transparent'
+      });
+      setTool('select');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = ''; // reset input
+  };
+
   return (
     <div className="relative h-full flex items-center z-10 pointer-events-none">
       <div className="absolute left-2 pointer-events-auto">
@@ -63,6 +91,10 @@ export const Toolbar = () => {
             >
               <Pen size={24} />
             </button>
+            <label className="p-3 rounded-xl hover:bg-white/20 transition-colors text-slate-400 hover:text-white cursor-pointer" title="Subir Imagen">
+              <ImageIcon size={24} />
+              <input type="file" accept="image/png, image/jpeg" className="hidden" onChange={handleImageUpload} />
+            </label>
             
             <div className="w-8 h-px bg-white/10 mx-auto" />
             
