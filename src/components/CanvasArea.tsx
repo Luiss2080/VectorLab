@@ -101,7 +101,6 @@ export const CanvasArea = () => {
     // Si la herramienta es el Lápiz, iniciamos un nuevo trazo
     if (currentTool === 'pen') {
       const coords = getCoords(e);
-      const newId = Date.now().toString();
       addShape({
         type: 'path',
         x: coords.x,
