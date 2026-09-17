@@ -1,7 +1,7 @@
 <div align="center">
   <br />
-  <img src="public/favicon.svg" alt="Sistema SVG Pro Logo" width="100" />
-  <h1>✨ Sistema SVG Pro Editor</h1>
+  <img src="public/favicon.svg" alt="VectorLab Logo" width="100" />
+  <h1>✨ VectorLab</h1>
   <p>
     <strong>El entorno de diseño vectorial más rápido, moderno y colaborativo de la web.</strong>
   </p>
@@ -18,7 +18,7 @@
 
 ## 🎨 Sobre el Proyecto
 
-**Sistema SVG Pro Editor** es un editor de gráficos vectoriales altamente interactivo y colaborativo (estilo Figma/Miro). Desarrollado con las últimas tecnologías del ecosistema frontend, este proyecto ofrece una experiencia "Desktop-like" directamente en tu navegador, impulsado por *React*, *Zustand* y un lienzo de SVG nativo para garantizar rendimiento puro a 60 FPS.
+**VectorLab** es un editor de gráficos vectoriales altamente interactivo y colaborativo (estilo Figma/Miro). Desarrollado con las últimas tecnologías del ecosistema frontend, este proyecto ofrece una experiencia "Desktop-like" directamente en tu navegador, impulsado por *React*, *Zustand* y un lienzo de SVG nativo para garantizar rendimiento puro a 60 FPS.
 
 ## 🚀 Características Principales
 
@@ -53,8 +53,8 @@ Sigue estos pasos para arrancar el entorno en tu máquina:
 
 1. **Clona el repositorio**
    ```bash
-   git clone https://github.com/tu-usuario/figuras-vectoriales.git
-   cd FigurasVectoriales
+   git clone https://github.com/Luiss2080/VectorLab.git
+   cd VectorLab
    ```
 
 2. **Instala las dependencias**
