@@ -16,7 +16,7 @@ export const exportToSVG = () => {
   if (!svgEl) return;
   const serializer = new XMLSerializer();
   let source = serializer.serializeToString(svgEl);
-  if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+  if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
     source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
   }
   const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });

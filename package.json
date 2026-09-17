@@ -6,13 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "preview": "vite preview",
     "test": "vitest run"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
-    "fabric": "^7.4.0",
     "framer-motion": "^13.3.0",
     "lucide-react": "^1.46.0",
     "react": "^19.2.8",
