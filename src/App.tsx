@@ -136,11 +136,11 @@ function App() {
       <header className="absolute top-4 left-1/2 -translate-x-1/2 h-14 border border-white/10 bg-[#080b14]/70 backdrop-blur-xl flex items-center justify-between px-4 rounded-2xl shadow-2xl shadow-black/50 z-20 min-w-[600px]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-black shadow-lg shadow-blue-500/20 text-white">
-            S
+            V
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] text-slate-400 font-bold tracking-widest uppercase">Sistema SVG</span>
-            <span className="text-sm font-black leading-none bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Pro Editor</span>
+            <span className="text-[9px] text-slate-400 font-bold tracking-widest uppercase">VectorLab</span>
+            <span className="text-sm font-black leading-none bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Editor</span>
           </div>
           
           <div className="w-px h-6 bg-white/10 mx-2" />
@@ -264,7 +264,7 @@ function App() {
                 <button onClick={() => setShowHelp(false)} className="text-slate-400 hover:text-white"><X size={20} /></button>
               </div>
               <div className="p-6 text-sm text-slate-300 space-y-4">
-                <p>Bienvenido al <strong>Sistema SVG Premium</strong>. Esta herramienta te permite crear composiciones vectoriales fácilmente.</p>
+                <p>Bienvenido a <strong>VectorLab</strong>. Esta herramienta te permite crear composiciones vectoriales fácilmente.</p>
                 
                 <div className="space-y-2">
                   <h4 className="font-bold text-white"> Herramientas Básicas:</h4>

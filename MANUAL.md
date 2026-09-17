@@ -1,6 +1,6 @@
-# Manual de Usuario - Sistema SVG Premium
+# Manual de Usuario - VectorLab
 
-Bienvenido a la documentación oficial del **Sistema SVG Premium**, una herramienta avanzada para la creación y manipulación de gráficos vectoriales desde el navegador, construida con React y Zustand.
+Bienvenido a la documentación oficial de **VectorLab**, una herramienta avanzada para la creación y manipulación de gráficos vectoriales desde el navegador, construida con React y Zustand.
 
 ## Interfaz de Usuario
 
