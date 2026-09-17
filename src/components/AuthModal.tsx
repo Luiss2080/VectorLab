@@ -33,7 +33,7 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             
             <div className="p-8 pb-6 text-center">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-black text-3xl shadow-lg shadow-blue-500/20 text-white mx-auto mb-4">
-                S
+                V
               </div>
               <h2 className="text-2xl font-black text-white mb-2">{isLogin ? 'Bienvenido de vuelta' : 'Crea tu cuenta'}</h2>
               <p className="text-sm text-slate-400">
