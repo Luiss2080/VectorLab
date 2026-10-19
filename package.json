@@ -16,7 +16,7 @@
     "lucide-react": "^1.46.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-hot-toast": "^2.6.0",
+    "react-hot-toast": "^2.6.1",
     "y-webrtc": "^10.3.0",
     "yjs": "^13.6.32",
     "zundo": "^2.3.0",
