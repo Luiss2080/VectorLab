@@ -8,6 +8,9 @@
   <img src="https://img.shields.io/badge/Vite-8.3-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 8.3" />
   <img src="https://img.shields.io/badge/tests-11%20pasan-brightgreen?style=for-the-badge" alt="11 tests" />
   <img src="https://github.com/Luiss2080/VectorLab/actions/workflows/ci.yml/badge.svg" alt="CI" />
+  <img src="https://img.shields.io/github/license/Luiss2080/VectorLab?color=blue" alt="Licencia MIT" />
+  <img src="https://img.shields.io/github/last-commit/Luiss2080/VectorLab" alt="Último commit" />
+  <img src="https://img.shields.io/badge/PRs-bienvenidos-brightgreen.svg" alt="PRs bienvenidos" />
   <p>
     <a href="#-inicio-rápido">Inicio rápido</a> ·
     <a href="#-características">Características</a> ·
@@ -111,9 +114,13 @@ npm run test     # vitest run
 - Sin selección múltiple, agrupación ni redimensionado con manejadores.
 - `MANUAL.md` es anterior a varias funciones (menciona solo SVG/JSON al exportar).
 
+## 🤝 Contribuir
+
+¡Las contribuciones son bienvenidas! Leé la [guía de contribución](CONTRIBUTING.md) y el [código de conducta](CODE_OF_CONDUCT.md) antes de abrir un PR. Para bugs o ideas usá las [plantillas de issues](../../issues/new/choose); los problemas de seguridad se reportan según la [política de seguridad](SECURITY.md). ¿Dudas? Mirá [SUPPORT.md](SUPPORT.md). Los cambios por versión están en el [CHANGELOG](CHANGELOG.md).
+
 ## 📄 Licencia
 
-Sin licencia definida: todos los derechos reservados por defecto (el README anterior afirmaba MIT, pero el repositorio no incluye archivo `LICENSE`).
+Distribuido bajo la licencia MIT. Ver [LICENSE](LICENSE).
 
 <div align="center">
   <sub>Hecho por Luiss2080 · React, Zustand y Yjs</sub>
